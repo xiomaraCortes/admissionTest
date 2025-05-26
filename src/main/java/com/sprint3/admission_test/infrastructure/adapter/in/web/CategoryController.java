@@ -1,5 +1,6 @@
 package com.sprint3.admission_test.infrastructure.adapter.in.web;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,6 +13,7 @@ import com.sprint3.admission_test.infrastructure.adapter.out.persistence.jpaRepo
 import com.sprint3.admission_test.service.MedicationService;
 
 @RestController
+@Slf4j
 public class CategoryController {
  @Autowired
     private CategoryJpaRepository categoryJpaRepository; // Inyectar el repositorio
@@ -23,6 +25,7 @@ public class CategoryController {
         
         // Si la categoría no se encuentra, devolver un error 404
         if (category.isEmpty()) {
+            log.info(" ENTRA A [CategoryController][CategoryJpaRepository] La categoria esta vacia" +category);
             return ResponseEntity.notFound().build();
         }
 

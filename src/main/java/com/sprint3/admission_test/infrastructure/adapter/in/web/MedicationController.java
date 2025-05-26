@@ -1,6 +1,7 @@
 package com.sprint3.admission_test.infrastructure.adapter.in.web;
 
 import com.sprint3.admission_test.application.ports.in.IMedicationUseCase;
+import com.sprint3.admission_test.domain.dto.MedicationDTO;
 import com.sprint3.admission_test.domain.model.Medication;
 import com.sprint3.admission_test.service.MedicationService;
 
@@ -9,6 +10,8 @@ import java.time.LocalDate;
 import java.util.List;
 
 import com.sprint3.admission_test.domain.model.Category;
+import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/medications")
+@Slf4j
 public class MedicationController {
 
     @Autowired  
@@ -39,13 +43,27 @@ public class MedicationController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Medication> getMedicationById(@PathVariable Long id) {
+        log.info("getMedicationById with id: {}", id);
         return ResponseEntity.status(HttpStatus.OK).body(medicationUseCase.getMedicationById(id));
     }
    
+//    @PostMapping("/addmedications")
+//    public ResponseEntity<Medication> addMedication(@RequestBody Medication newMedication) {
+//        Medication savedMedication = medicationService.addMedication(newMedication);
+//        return ResponseEntity.status(HttpStatus.CREATED).body(savedMedication);
+//    }
+
     @PostMapping("/addmedications")
-    public ResponseEntity<Medication> addMedication(@RequestBody Medication newMedication) {
-        Medication savedMedication = medicationService.addMedication(newMedication);
+    public ResponseEntity<Medication> addMedication(@Valid @RequestBody MedicationDTO dto) {
+        log.info(" ENTRA A [MedicationController][addmedications]]");
+        Medication medication = new Medication();
+        medication.setName(dto.getName());
+        medication.setDescription(dto.getDescription());
+        medication.setPrice(dto.getPrice());
+        medication.setExpirationDate(dto.getExpirationDate());
+        Medication savedMedication = medicationService.addMedication(medication);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedMedication);
+
     }
 
     // Endpoint para obtener medicamentos de una categoría que caducarán después de una fecha dada
@@ -53,7 +71,7 @@ public class MedicationController {
     public ResponseEntity<List<Medication>> getMedicationsByCategoryAndExpirationDateAfter(
             @RequestParam("categoryId") Long categoryId,
             @RequestParam("expirationDate") String expirationDate) {
-
+        log.info(" ENTRA A [MedicationController][filter]]");
         // Convertir la fecha recibida en el formato adecuado (LocalDate)
         LocalDate date = LocalDate.parse(expirationDate);
 

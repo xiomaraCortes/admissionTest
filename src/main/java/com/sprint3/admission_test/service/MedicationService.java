@@ -9,8 +9,10 @@ import com.sprint3.admission_test.domain.model.Category;
 import com.sprint3.admission_test.domain.model.Medication;
 import com.sprint3.admission_test.infrastructure.adapter.out.persistence.jpaRepository.CategoryJpaRepository;
 import com.sprint3.admission_test.infrastructure.adapter.out.persistence.jpaRepository.MedicationJpaRepository;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 public class MedicationService {
 
     @Autowired
@@ -23,6 +25,7 @@ public class MedicationService {
     public Medication addMedication(Medication newMedication) {
         // Verifica si la categoría proporcionada existe en la base de datos
         if (newMedication.getCategory() == null || newMedication.getCategory().getId() == null) {
+            log.info(" ENTRA A [MedicationService][addMedication]]");
             throw new IllegalArgumentException("Category must be provided and valid.");
         }
 
@@ -39,6 +42,7 @@ public class MedicationService {
 
      // Método para consultar medicamentos por categoría y fecha de expiración
     public List<Medication> getMedicationsByCategoryAndExpirationDateAfter(Category category, LocalDate expirationDate) {
+        log.info(" ENTRA A [MedicationService][getMedicationsByCategoryAndExpirationDateAfter]]" + category );
         return medicationJpaRepository.findByCategoryAndExpirationDateAfter(category, expirationDate);
     }
 
