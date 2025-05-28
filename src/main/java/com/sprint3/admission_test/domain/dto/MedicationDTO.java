@@ -2,75 +2,117 @@ package com.sprint3.admission_test.domain.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.*;
+import lombok.Generated;
+import org.hibernate.validator.constraints.Length;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Objects;
 
 public class MedicationDTO {
 
-    @NotBlank(message = "El nombre es obligatorio")
-    @Size(min = 5, max = 100, message = "El nombre debe tener entre 5 y 100 caracteres")
-    private String name;
-
-
-    @NotBlank (message = "La descripcion es obligatorio")
-    @Size(min = 30, max = 255, message = "La descripcion  debe tener entre 30 y 255 caracteres")
-    private String description;
-
-
-
-    @NotNull(message = "El precio es obligatorio")
-    @Digits(integer = 10, fraction = 2, message = "El precio debe tener como máximo 10 dígitos enteros y 2 decimales")
-    @DecimalMin(value = "0.01", inclusive = true, message = "El precio debe ser mayor a 0")
-    private BigDecimal price;
-
-
-    @NotNull(message = "La fecha de expiración es obligatoria")
-    @Future(message = "La fecha debe estar en el futuro")
-    @JsonFormat(pattern = "yyyy-MM-dd")
+    private @NotNull @Length(
+            min = 5,
+            max = 100
+    ) String name;
+    private @NotNull @Length(
+            min = 30,
+            max = 255
+    ) String description;
+    private @NotNull @DecimalMin(
+            value = "0.0",
+            inclusive = false
+    ) @Digits(
+            integer = 12,
+            fraction = 2
+    ) BigDecimal price;
     private LocalDate expirationDate;
+    private @NotNull @Length(
+            min = 3,
+            max = 50
+    ) String categoryName;
 
-
-
-    @NotBlank (message = "La Categoria es obligatoria")
-    @Size( max = 50, message = "La descripcion  debe tener entre 30 y 255 caracteres")
-    private String category;
-
-    public String getName() {
-        return name;
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        } else if (o != null && this.getClass() == o.getClass()) {
+            MedicationDTO that = (MedicationDTO)o;
+            return Objects.equals(this.name, that.name) && Objects.equals(this.description, that.description) && Objects.equals(this.price, that.price) && Objects.equals(this.expirationDate, that.expirationDate) && Objects.equals(this.categoryName, that.categoryName);
+        } else {
+            return false;
+        }
     }
 
-    public void setName(String name) {
+    public int hashCode() {
+        return Objects.hash(new Object[]{this.name, this.description, this.price, this.expirationDate, this.categoryName});
+    }
+
+    @Generated
+    public String getName() {
+        return this.name;
+    }
+
+    @Generated
+    public String getDescription() {
+        return this.description;
+    }
+
+    @Generated
+    public BigDecimal getPrice() {
+        return this.price;
+    }
+
+    @Generated
+    public LocalDate getExpirationDate() {
+        return this.expirationDate;
+    }
+
+    @Generated
+    public String getCategoryName() {
+        return this.categoryName;
+    }
+
+    @Generated
+    public void setName(final String name) {
         this.name = name;
     }
 
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
+    @Generated
+    public void setDescription(final String description) {
         this.description = description;
     }
 
-    public BigDecimal getPrice() {
-        return price;
-    }
-
-    public void setPrice(BigDecimal price) {
+    @Generated
+    public void setPrice(final BigDecimal price) {
         this.price = price;
     }
-    public LocalDate getExpirationDate() {
-        return expirationDate;
-    }
 
-    public void setExpirationDate(LocalDate expirationDate) {
+    @Generated
+    public void setExpirationDate(final LocalDate expirationDate) {
         this.expirationDate = expirationDate;
     }
-    public String getCategory() {
-        return category;
+
+    @Generated
+    public void setCategoryName(final String categoryName) {
+        this.categoryName = categoryName;
     }
 
-    public void setCategory(String category) {
-        this.category = category;
+    @Generated
+    public String toString() {
+        String var10000 = this.getName();
+        return "CreateMedicationReqDto(name=" + var10000 + ", description=" + this.getDescription() + ", price=" + this.getPrice() + ", expirationDate=" + this.getExpirationDate() + ", categoryName=" + this.getCategoryName() + ")";
+    }
+
+    @Generated
+    public MedicationDTO(final String name, final String description, final BigDecimal price, final LocalDate expirationDate, final String categoryName) {
+        this.name = name;
+        this.description = description;
+        this.price = price;
+        this.expirationDate = expirationDate;
+        this.categoryName = categoryName;
+    }
+
+    @Generated
+    public MedicationDTO() {
     }
 }

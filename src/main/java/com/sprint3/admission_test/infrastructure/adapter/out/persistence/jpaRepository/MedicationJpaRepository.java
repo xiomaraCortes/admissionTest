@@ -13,21 +13,10 @@ import org.springframework.data.repository.query.Param;
 import com.sprint3.admission_test.domain.model.Category;
 
 public interface MedicationJpaRepository extends JpaRepository<Medication, Long> {
-
-    // Método para buscar un medicamento por su ID
-    Optional<Medication> findById(Long id);
-
-    // Método para guardar un medicamento
-    Medication save(Medication medication);
-
-    // Consulta personalizada para encontrar medicamentos de una categoría que caducarán después de una fecha
-    @Query("SELECT m FROM Medication m WHERE m.category = :category AND m.expirationDate > :expirationDate")
-    List<Medication> findByCategoryAndExpirationDateAfter(Category category, LocalDate expirationDate);
-
-    @Query("SELECT m FROM Medication m WHERE m.category.name = :categoryName AND m.expirationDate > :expirationDate")
-    List<Medication> getMedicationsByCategoryAndExpirationDateAfter(
-            @Param("categoryName") String categoryName,
-            @Param("expirationDate") LocalDate expirationDate
-    );
+    @Query(
+            value = "SELECT m.* FROM medications m INNER JOIN categories c ON m.category_id = c.id WHERE c.name = ?1 AND expiration_date > ?2",
+            nativeQuery = true
+    )
+    Iterable<Medication> findByCategoryAndDateAfter(String categoryName, LocalDate expAfter);
 
 }

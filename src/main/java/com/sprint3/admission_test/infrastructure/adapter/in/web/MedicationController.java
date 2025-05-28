@@ -1,8 +1,11 @@
 package com.sprint3.admission_test.infrastructure.adapter.in.web;
 
 import com.sprint3.admission_test.application.ports.in.IMedicationUseCase;
+import com.sprint3.admission_test.domain.dto.AllMedicationDTO;
 import com.sprint3.admission_test.domain.dto.MedicationDTO;
+import com.sprint3.admission_test.domain.exceptions.NotFoundException;
 import com.sprint3.admission_test.domain.model.Medication;
+import com.sprint3.admission_test.infrastructure.adapter.out.persistence.jpaRepository.CategoryJpaRepository;
 import com.sprint3.admission_test.service.MedicationService;
 
 import java.math.BigDecimal;
@@ -11,7 +14,13 @@ import java.util.List;
 
 import com.sprint3.admission_test.domain.model.Category;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import lombok.Generated;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.coyote.BadRequestException;
+import org.hibernate.validator.constraints.Length;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +31,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 
 @RestController
@@ -29,128 +39,50 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 public class MedicationController {
 
-    @Autowired  
-    private IMedicationUseCase medicationUseCase;
-    private int id;
-    private String name;
-    private String description;
-    private BigDecimal price;
-    private LocalDate expirationDate;
-    private Category category;
-
+    @Generated
+    private static final Logger log = LoggerFactory.getLogger(MedicationController.class);
     @Autowired
-    private MedicationService medicationService;  // Servicio inyectado
+    private IMedicationUseCase medicationUseCase;
+    @Autowired
+    private CategoryJpaRepository categoryJpaRepository;
 
-    @GetMapping("/{id}")
+
+    @GetMapping({"/{id}"})
     public ResponseEntity<Medication> getMedicationById(@PathVariable Long id) {
-        log.info("getMedicationById with id: {}", id);
-        return ResponseEntity.status(HttpStatus.OK).body(medicationUseCase.getMedicationById(id));
-    }
-   
-//    @PostMapping("/addmedications")
-//    public ResponseEntity<Medication> addMedication(@RequestBody Medication newMedication) {
-//        Medication savedMedication = medicationService.addMedication(newMedication);
-//        return ResponseEntity.status(HttpStatus.CREATED).body(savedMedication);
-//    }
-
-    @PostMapping("/addmedications")
-    public ResponseEntity<Medication> addMedication(@Valid @RequestBody MedicationDTO dto) {
-        log.info(" ENTRA A [MedicationController][addmedications]]");
-        Medication medication = new Medication();
-        medication.setName(dto.getName());
-        medication.setDescription(dto.getDescription());
-        medication.setPrice(dto.getPrice());
-        medication.setExpirationDate(dto.getExpirationDate());
-        Medication savedMedication = medicationService.addMedication(medication);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedMedication);
-
+        return ResponseEntity.status(HttpStatus.OK).body(this.medicationUseCase.getMedicationById(id));
     }
 
-    // Endpoint para obtener medicamentos de una categoría que caducarán después de una fecha dada
-    @GetMapping("filter")
-    public ResponseEntity<List<Medication>> getMedicationsByCategoryAndExpirationDateAfter(
-            @RequestParam("categoryId") Long categoryId,
-            @RequestParam("expirationDate") String expirationDate) {
-        log.info(" ENTRA A [MedicationController][filter]]");
-        // Convertir la fecha recibida en el formato adecuado (LocalDate)
-        LocalDate date = LocalDate.parse(expirationDate);
+    @PostMapping({""})
+    public ResponseEntity<?> create(@RequestBody @Valid MedicationDTO dto) {
+        try {
+            log.info("medications.create body {}", dto);
 
-        // Crear una categoría a partir del ID proporcionado
-        Category category = new Category();
-        category.setId(categoryId);
+            // Se delega la creación al UseCase, que internamente debería manejar el guardado
+            Medication medication = medicationUseCase.create(dto);
 
-        // Obtener los medicamentos que cumplen con el criterio
-        List<Medication> medications = medicationService.getMedicationsByCategoryAndExpirationDateAfter(category, date);
+            // Respuesta con el objeto creado y código 201 CREATED
+            return ResponseEntity.status(HttpStatus.CREATED).body(medication);
 
-        // Si no hay medicamentos, devolver No Content (204)
-        if (medications.isEmpty()) {
-            return ResponseEntity.noContent().build();
+        } catch (NotFoundException e) {
+            // Si no se encuentra la categoría u otro recurso, devolver 404
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
-
-        // Devolver la lista de medicamentos con un código 200 OK
-        return ResponseEntity.ok(medications);
     }
 
+    @GetMapping({"/category/{category}"})
+    public ResponseEntity<?> getAllMedicationsByCategory(@PathVariable @NotNull @Length(
+            min = 3,
+            max = 50
+    ) String category, @RequestParam("expiration-after") String expAfter) {
+        log.info("medications.medicationsByCategory category {} expAfter {}", category, expAfter);
+        LocalDate expAfterDate = LocalDate.parse(expAfter);
 
-
-    
-    public int getId() {
-        return id;
-    }
-
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-
-    public String getName() {
-        return name;
-    }
-
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-
-    public String getDescription() {
-        return description;
-    }
-
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-
-    public BigDecimal getPrice() {
-        return price;
-    }
-
-
-    public void setPrice(BigDecimal price) {
-        this.price = price;
-    }
-
-
-    public LocalDate getExpirationDate() {
-        return expirationDate;
-    }
-
-
-    public void setExpirationDate(LocalDate expirationDate) {
-        this.expirationDate = expirationDate;
-    }
-
-
-    public Category getCategory() {
-        return category;
-    }
-
-
-    public void setCategory(Category category) {
-        this.category = category;
+        try {
+            List<Medication> medications = this.medicationUseCase.getAllMedications(new AllMedicationDTO(category, expAfterDate));
+            return new ResponseEntity(medications, HttpStatus.OK);
+        } catch (NotFoundException e) {
+            return new ResponseEntity(e.getMessage(), HttpStatus.NOT_FOUND);
+        }
     }
     
 }

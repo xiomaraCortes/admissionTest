@@ -15,7 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class MedicationService {
 
-    @Autowired
+    /*@Autowired
     private CategoryJpaRepository categoryJpaRepository;
 
     @Autowired
@@ -43,9 +43,9 @@ public class MedicationService {
      // Método para consultar medicamentos por categoría y fecha de expiración
     public List<Medication> getMedicationsByCategoryAndExpirationDateAfter(Category category, LocalDate expirationDate) {
         log.info(" ENTRA A [MedicationService][getMedicationsByCategoryAndExpirationDateAfter]]" + category );
-        return medicationJpaRepository.findByCategoryAndExpirationDateAfter(category, expirationDate);
+        return medicationJpaRepository.findByCategoryAndDateAfter(category, expirationDate);
     }
-
+*/
 
 
 
